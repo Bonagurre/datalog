@@ -1,10 +1,8 @@
-"""Configuration parser and defaults"""
-
 import os.path
 import logging
 import abc
 from configparser import ConfigParser
-import pkg_resources
+import importlib.resources as pkg_resources  # Use importlib.resources instead of pkg_resources
 import appdirs
 
 THIS_DIR = os.path.dirname(os.path.realpath(__file__))
@@ -102,9 +100,7 @@ class AdcConfig(BaseConfig):
         logger.debug("Creating config file at %s", directory)
 
         # copy across distribution template
-        with open(config_file, 'wb') as user_file:
-            # find distribution config file and copy it to the user config file
-            user_file.writelines(
-                pkg_resources.resource_stream(__name__,
-                                              cls.DEFAULT_CONFIG_FILENAME)
-            )
+        with pkg_resources.path(__package__, cls.DEFAULT_CONFIG_FILENAME) as dist_file:
+            with open(dist_file, 'rb') as src:
+                with open(config_file, 'wb') as user_file:
+                    user_file.write(src.read())
